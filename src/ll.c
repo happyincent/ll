@@ -45,16 +45,16 @@
                            : pthread_rwlock_wrlock(&(lk))
 #define RWUNLOCK(lk) pthread_rwlock_unlock(&(lk));
 
-/* type definitions */
-
-typedef enum locktype locktype_t;
-
 // locktype enumerates the two typs of rw locks. This isused in the macros above for
 // simplifying all the locking/unlocking that goes on.
 enum locktype {
     l_read,
     l_write
 };
+
+/* type definitions */
+
+typedef enum locktype locktype_t;
 
 // ll_node models a linked-list node
 struct ll_node {
@@ -305,10 +305,10 @@ int ll_remove_first(ll_t *list) {
  *
  * @returns the new length of thew linked list on success, -1 otherwise
  */
-int ll_remove_search(ll_t *list, int cond(void *)) {
+int ll_remove_search(ll_t *list, int cond(void *, void *), void *val) {
     ll_node_t *last = NULL;
     ll_node_t *node = list->hd;
-    while ((node != NULL) && !(cond(node->val))) {
+    while ((node != NULL) && !(cond(node->val, val))) {
         last = node;
         node = node->nxt;
     }
@@ -335,6 +335,15 @@ int ll_remove_search(ll_t *list, int cond(void *)) {
     return list->len;
 }
 
+int ll_search(ll_t *list, int cond(void *, void *), void *val) {
+    ll_node_t *node = list->hd;
+    while ((node != NULL) && !(cond(node->val, val))) {
+        node = node->nxt;
+    }
+
+    return node == NULL;
+}
+
 /**
  * @function ll_get_n
  *
@@ -346,7 +355,7 @@ int ll_remove_search(ll_t *list, int cond(void *)) {
  * @returns the `val` attribute of the nth element of `list`.
  */
 void *ll_get_n(ll_t *list, int n) {
-    ll_node_t *node;
+    ll_node_t *node = NULL;
     if (ll_select_n_min_1(list, &node, n + 1, l_read))
         return NULL;
 
@@ -412,7 +421,9 @@ void ll_print(ll_t list) {
  * @param n - a pointer
  */
 void ll_no_teardown(void *n) {
-    n += 0; // compiler won't let me just return
+    // n += 0; // compiler won't let me just return
+    int *ignore_unused = n;
+    ignore_unused += 0;
 }
 
 #ifdef LL
@@ -426,8 +437,8 @@ void num_printer(void *n) {
     printf(" %d", *(int *)n);
 }
 
-int num_equals_3(void *n) {
-    return *(int *)n == 3;
+int num_equals(void *n, void *m) {
+    return *(unsigned long *)n == *(unsigned long *)m;
 }
 
 int main() {
@@ -516,15 +527,16 @@ int main() {
 
     // (ll: 0 1 2 3 4 5 6), length: 7
 
-    ll_remove_first(list);                // (ll: 1 2 3 4 5 6), length: 6
-    ll_remove_n(list, 1);                 // (ll: 1 3 4 5 6),   length: 5
-    ll_remove_n(list, 2);                 // (ll: 1 3 5 6),     length: 4
-    ll_remove_n(list, 5);                 // (ll: 1 3 5 6),     length: 4; does nothing
-    ll_remove_search(list, num_equals_3); // (ll: 1 5 6),       length: 3
-    ll_insert_first(list, &h);            // (ll: 3 1 5 6),     length: 5
-    ll_insert_last(list, &i);             // (ll: 3 1 5 6 3),   length: 5
-    ll_remove_search(list, num_equals_3); // (ll: 1 5 6 3),     length: 4
-    ll_remove_search(list, num_equals_3); // (ll: 1 5 6),       length: 3
+    ll_remove_first(list);                  // (ll: 1 2 3 4 5 6), length: 6
+    ll_remove_n(list, 1);                   // (ll: 1 3 4 5 6),   length: 5
+    ll_remove_n(list, 2);                   // (ll: 1 3 5 6),     length: 4
+    ll_remove_n(list, 5);                   // (ll: 1 3 5 6),     length: 4; does nothing
+    ll_remove_search(list, num_equals, &d); // (ll: 1 5 6),       length: 3
+    ll_remove_search(list, num_equals, &d);
+    ll_insert_first(list, &h);              // (ll: 3 1 5 6),     length: 5
+    ll_insert_last(list, &i);               // (ll: 3 1 5 6 3),   length: 5
+    ll_remove_search(list, num_equals, &d); // (ll: 1 5 6 3),     length: 4
+    ll_remove_search(list, num_equals, &d); // (ll: 1 5 6),       length: 3
 
     ll_print(*list);
 
