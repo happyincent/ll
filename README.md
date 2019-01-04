@@ -117,7 +117,7 @@ $ make test
 
 ---
 
-## Make changes for `test.c` (ref: [concurrent-ll](https://github.com/jserv/concurrent-ll))
+## Add `test.c` (ref: [concurrent-ll](https://github.com/jserv/concurrent-ll))
 
 ### Issues
 * Error happens with >=2 of threads
