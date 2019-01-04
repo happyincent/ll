@@ -6,8 +6,9 @@ DIRS   = $(SRCDIR) $(OBJDIR) $(BINDIR) $(INDDIR)
 
 EXEC = test
 
-OBJ = $(OBJDIR)/ll.o \
-	  $(OBJDIR)/test.o
+OBJ = \
+	$(OBJDIR)/ll.o \
+	$(OBJDIR)/test.o
 
 deps = $(OBJ:%.o=%.o.d)
 
