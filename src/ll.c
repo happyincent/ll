@@ -329,6 +329,8 @@ int ll_remove_search(ll_t *list, int cond(void *, void *), void *val) {
             last->nxt = node->nxt;
         }
 
+        list->val_teardown(node->val);
+        
         RWUNLOCK(node->m);
         free(node);
         RWUNLOCK(last->m);
