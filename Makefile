@@ -32,7 +32,7 @@ $(EXEC): %: $(BINDIR) $(BINDIR)/%
 
 $(BINDIR)/%: $(OBJ)
 	@echo building binary...
-	$(CC) $(CFLAGS) -o $@ $?
+	$(CC) $(CFLAGS) -o $@ $(OBJ)
 
 $(DIRS):
 	@mkdir -p $@

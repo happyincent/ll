@@ -306,42 +306,71 @@ int ll_remove_first(ll_t *list) {
  * @returns the new length of thew linked list on success, -1 otherwise
  */
 int ll_remove_search(ll_t *list, int cond(void *, void *), void *val) {
-    ll_node_t *last = NULL;
-    ll_node_t *node = list->hd;
-    while ((node != NULL) && !(cond(node->val, val))) {
+    ll_node_t *last = list->hd;
+    RWLOCK(l_write, last->m);
+    if (last->nxt == NULL) {
+        RWUNLOCK(last->m);
+        return -1;
+    }
+    
+    ll_node_t *node = last->nxt;
+    RWLOCK(l_write, node->m);
+    while ((node->nxt != NULL) && !(cond(node->val, val))) {
+        RWUNLOCK(last->m)
         last = node;
         node = node->nxt;
+        RWLOCK(l_write, node->m);
     }
 
-    if (node == NULL) {
-        return -1;
-    } else if (node == list->hd) {
-        RWLOCK(l_write, list->m);
-        list->hd = node->nxt;
-        RWUNLOCK(list->m);
-    } else {
-        RWLOCK(l_write, last->m);
-        last->nxt = node->nxt;
+    if (node->nxt != NULL || (node->nxt == NULL && !(cond(node->val, val))) ) {
+        if (node == list->hd) {
+            list->hd = node->nxt;
+        } else {
+            last->nxt = node->nxt;
+        }
+
+        RWUNLOCK(node->m);
+        free(node);
         RWUNLOCK(last->m);
+
+        RWLOCK(l_write, list->m);
+        (list->len)--;
+        RWUNLOCK(list->m);
+
+        return list->len;
     }
 
-    list->val_teardown(node->val);
-    free(node);
-
-    RWLOCK(l_write, list->m);
-    (list->len)--;
-    RWUNLOCK(list->m);
-
-    return list->len;
+    RWUNLOCK(node->m);
+    RWUNLOCK(last->m);
+    return -1;
 }
 
 int ll_search(ll_t *list, int cond(void *, void *), void *val) {
-    ll_node_t *node = list->hd;
-    while ((node != NULL) && !(cond(node->val, val))) {
+    ll_node_t *last = list->hd;
+    RWLOCK(l_read, last->m);
+    if (last->nxt == NULL) {
+        RWUNLOCK(last->m);
+        return -1;
+    }
+    
+    ll_node_t *node = last->nxt;
+    RWLOCK(l_read, node->m);
+    while ((node->nxt != NULL) && !(cond(node->val, val))) {
+        RWUNLOCK(last->m)
+        last = node;
         node = node->nxt;
+        RWLOCK(l_read, node->m);
     }
 
-    return node == NULL;
+    if (node->nxt != NULL || (node->nxt == NULL && !(cond(node->val, val))) ) {
+        RWUNLOCK(node->m);
+        RWUNLOCK(last->m);
+        return 1;
+    }
+
+    RWUNLOCK(node->m);
+    RWUNLOCK(last->m);
+    return -1;
 }
 
 /**

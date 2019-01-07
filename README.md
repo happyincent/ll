@@ -119,44 +119,49 @@ $ make test
 
 ## Add `test.c` (ref: [concurrent-ll](https://github.com/jserv/concurrent-ll))
 
-### Issues
-* Error happens with >=2 of threads
-    ```
-    $ cat <(echo "CPU:    " `lscpu | grep "Model name" | cut -d':' -f2 | sed "s/  //"`) <(echo "OS:     " `lsb_release -d | cut -f2`) <(echo "Kernel: " `uname -a | cut -d' ' -f1,3,14`) <(echo "gcc:    " `gcc --version | head -n1`)
-    CPU:     Intel(R) Xeon(R) CPU E5520 @ 2.27GHz
-    OS:      Ubuntu 16.04.5 LTS
-    Kernel:  Linux 4.15.0-43-generic x86_64
-    gcc:     gcc (Ubuntu 5.4.0-6ubuntu1~16.04.11) 5.4.0 20160609
-    ```
+### Enviornments
+```
+$ cat <(echo "CPU:    " `lscpu | grep "Model name" | cut -d':' -f2 | sed "s/  //"`) <(echo "OS:     " `lsb_release -d | cut -f2`) <(echo "Kernel: " `uname -a | cut -d' ' -f1,3,14`) <(echo "gcc:    " `gcc --version | head -n1`)
+CPU:     Intel(R) Xeon(R) CPU E5520 @ 2.27GHz
+OS:      Ubuntu 16.04.5 LTS
+Kernel:  Linux 4.15.0-43-generic x86_64
+gcc:     gcc (Ubuntu 5.4.0-6ubuntu1~16.04.11) 5.4.0 20160609
+```
 
-    ```
-    $ ./bin/test
-    Thread 0
-    #operations   : 248662
-    #inserts   : 25232
-    #removes   : 25231
-    Duration      : 1000 (ms)
-    #txs     : 248662 (248662.000000 / s)
-
-    $ ./bin/test -n 2
-    Illegal instruction (core dumped)
-    ```
-
-    ```
-    $ gdb -q --args ./bin/test "-n 2"
-    Reading symbols from ./bin/test...done.
-    (gdb) r
-    Starting program: /home/itlab/Desktop/ll/bin/test -n\ 2
-    [Thread debugging using libthread_db enabled]
-    Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
-    [New Thread 0x7ffff77ef700 (LWP 31597)]
-    [New Thread 0x7ffff6fee700 (LWP 31598)]
-
-    Thread 3 "test" received signal SIGILL, Illegal instruction.
-    [Switching to Thread 0x7ffff6fee700 (LWP 31598)]
-    __GI___pthread_rwlock_unlock (rwlock=rwlock@entry=0x7ffff00083c0) at pthread_rwlock_unlock.c:38
-    38      pthread_rwlock_unlock.c: No such file or directory.
-    (gdb)
-    ```
-
-    > Can bypass this error by add `printf("\n");` at [test.c:145](https://github.com/happyincent/ll/blob/master/src/test.c#L145) (not all enviornments)
+### Result
+```
+(gdb) make clean all
+building object files...
+gcc -g -O1 -Wall -Werror -Wextra -Wunused -std=gnu99 -D_GNU_SOURCE -pthread -fno-strict-aliasing -D_REENTRANT -pedantic -I"include" -o obj/ll.o -MMD -MF obj/ll.o.d -c src/ll.c
+building object files...
+gcc -g -O1 -Wall -Werror -Wextra -Wunused -std=gnu99 -D_GNU_SOURCE -pthread -fno-strict-aliasing -D_REENTRANT -pedantic -I"include" -o obj/test.o -MMD -MF obj/test.o.d -c src/test.c
+building binary...
+gcc -g -O1 -Wall -Werror -Wextra -Wunused -std=gnu99 -D_GNU_SOURCE -pthread -fno-strict-aliasing -D_REENTRANT -pedantic -I"include" -o bin/test obj/ll.o obj/test.o
+(gdb) run
+`/home/itlab/Desktop/ll/bin/test' has changed; re-reading symbols.
+Starting program: /home/itlab/Desktop/ll/bin/test -n\ 3
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[New Thread 0x7ffff77ef700 (LWP 5021)]
+[New Thread 0x7fffeefee700 (LWP 5022)]
+[New Thread 0x7ffff6fee700 (LWP 5023)]
+Thread 0
+  #operations   : 101973
+  #inserts   : 10321
+  #removes   : 10320
+Thread 1
+  #operations   : 100374
+  #inserts   : 10184
+  #removes   : 10183
+Thread 2
+  #operations   : 103057
+  #inserts   : 10447
+  #removes   : 10446
+Duration      : 1000 (ms)
+#txs     : 305404 (305404.000000 / s)
+Expected size: 1026 Actual size: 1026
+[Thread 0x7ffff6fee700 (LWP 5023) exited]
+[Thread 0x7fffeefee700 (LWP 5022) exited]
+[Thread 0x7ffff77ef700 (LWP 5021) exited]
+[Inferior 1 (process 5014) exited normally]
+```

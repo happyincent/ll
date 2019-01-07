@@ -142,8 +142,6 @@ void *test(void *data)
     // start the test
     while (*running) {
 
-        // printf("\n"); // sometimes bypass error ...
-
         // generate a value (node that rand_max is expected to be a power of 2)
         the_value = my_random(&seeds[0], &seeds[1], &seeds[2]) & rand_max;
         // generate the operation
@@ -153,13 +151,13 @@ void *test(void *data)
             ll_search(the_list, num_equals, &the_value);
         } else if (last == -1) {
             // do a write operation
-            if (ll_insert_last(the_list, &the_value)) {
+            if (ll_insert_last(the_list, &the_value) != -1) {
                 d->num_insert++;
                 last = 1;
             }
         } else {
             // do a delete operation
-            if (ll_remove_search(the_list, num_equals, &the_value)) {
+            if (ll_remove_search(the_list, num_equals, &the_value) != -1) {
                 d->num_remove++;
                 last = -1;
             }
@@ -371,8 +369,7 @@ int main(int argc, char *const argv[])
     printf("Duration      : %d (ms)\n", duration);
     printf("#txs     : %lu (%f / s)\n", operations,
            operations * 1000.0 / duration);
-    // printf("Expected size: %ld Actual size: %d\n", reported_total,
-    //        list_size(the_list));
+    printf("Expected size: %ld Actual size: %d\n", reported_total, the_list->len);
 
     free(threads);
     free(data);
