@@ -148,7 +148,7 @@ void *test(void *data)
         op = my_random(&seeds[0], &seeds[1], &seeds[2]) & 0xff;
         if (op < read_thresh) {
             // do a find operation
-            ll_search(the_list, num_equals, &the_value);
+            // ll_search(the_list, num_equals, &the_value);
         } else if (last == -1) {
             // do a write operation
             if (ll_insert_last(the_list, &the_value) != -1) {
