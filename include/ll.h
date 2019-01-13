@@ -88,6 +88,8 @@ int ll_insert_first(ll_t *list, void *val);
 // returns the new length of the linked list if successful, -1 otherwise
 int ll_insert_last(ll_t *list, void *val);
 
+int my_ll_insert_last(ll_t *list, void *val);
+
 // removes the value at position n of the linked list.
 // returns the new length of the linked list if successful, -1 otherwise
 int ll_remove_n(ll_t *list, int n);
