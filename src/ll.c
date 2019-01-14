@@ -277,8 +277,6 @@ int ll_remove_search(ll_t *list, int cond(int, int), int val) {
             RWLOCK(l_write, node->m);
     }
 
-    if (node != NULL)
-        RWUNLOCK(node->m);
     RWUNLOCK(prev->m);
     return -1;
 }
