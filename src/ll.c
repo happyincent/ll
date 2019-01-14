@@ -59,7 +59,7 @@ typedef enum locktype locktype_t;
 // ll_node models a linked-list node
 struct ll_node {
     // pointer to the value at the node
-    int val;
+    void *val;
 
     // pointer to the next node
     ll_node_t *nxt;
@@ -134,7 +134,7 @@ void ll_delete(ll_t *list) {
  *
  * @returns a pointer to the new node
  */
-ll_node_t *ll_new_node(int val) {
+ll_node_t *ll_new_node(void *val) {
     ll_node_t *node = (ll_node_t *)malloc(sizeof(ll_node_t));
     node->val = val;
     node->nxt = NULL;
@@ -153,7 +153,7 @@ ll_node_t *ll_new_node(int val) {
  *
  * @returns the new length of thew linked list on success, -1 otherwise
  */
-int ll_insert_last(ll_t *list, int val) {
+int ll_insert_last(ll_t *list, void *val) {
     if (list == NULL)
         list = ll_new(ll_no_teardown);
 
@@ -202,7 +202,7 @@ int ll_insert_last(ll_t *list, int val) {
  *
  * @returns the new length of thew linked list on success, -1 otherwise
  */
-int ll_remove_search(ll_t *list, int cond(int, int), int val) {
+int ll_remove_search(ll_t *list, int cond(void *, void *), void *val) {
     if (list == NULL)
         return -1;
 
@@ -281,7 +281,7 @@ int ll_remove_search(ll_t *list, int cond(int, int), int val) {
     return -1;
 }
 
-int ll_search(ll_t *list, int cond(int, int), int val) {
+int ll_search(ll_t *list, int cond(void *, void *), void *val) {
     if (list == NULL)
         return -1;
 
@@ -362,10 +362,10 @@ void ll_print(ll_t list) {
  *
  * @param n - a pointer
  */
-void ll_no_teardown(int n) {
-    n += 0; // compiler won't let me just return
-    // int *ignore_unused = n;
-    // ignore_unused += 0;
+void ll_no_teardown(void *n) {
+    // n += 0; // compiler won't let me just return
+    int *ignore_unused = n;
+    ignore_unused += 0;
 }
 
 // /**
@@ -569,8 +569,8 @@ void ll_no_teardown(int n) {
 //     printf(" %d", n);
 // }
 
-// int num_equals(int n, int m) {
-//     return n == m;
+// int num_equals(void *n, void *m) {
+//     return *(unsigned long *)n == *(unsigned long *)m;
 // }
 
 // int main() {

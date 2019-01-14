@@ -99,8 +99,8 @@ typedef ALIGNED(64) struct thread_data {
     int id;
 } thread_data_t;
 
-int num_equals(int n, int m) {
-    return n == m;
+int num_equals(void *n, void *m) {
+    return *(unsigned long *)n == *(unsigned long *)m;
 }
 
 void *test(void *data)
@@ -118,7 +118,7 @@ void *test(void *data)
     seeds = seed_rand();
     rand_max = max_key;
     uint32_t op;
-    unsigned long the_value;
+    static unsigned long the_value; // keep the val !!!
     int i;
     int last = -1;
 
@@ -132,7 +132,7 @@ void *test(void *data)
         the_value = my_random(&seeds[0], &seeds[1], &seeds[2]) & rand_max;
         // we make sure the insert was effective (as opposed to just updating an
         // existing entry)
-        if (ll_insert_last(the_list, the_value) == -1) {
+        if (ll_insert_last(the_list, &the_value) == -1) {
             i--;
         }
     }
@@ -148,15 +148,15 @@ void *test(void *data)
         op = my_random(&seeds[0], &seeds[1], &seeds[2]) & 0xff;
         if (op < read_thresh) {
             // do a find operation
-            ll_search(the_list, num_equals, the_value);
+            ll_search(the_list, num_equals, &the_value);
         } else if (last == -1) {
             // do a write operation
-            ll_insert_last(the_list, the_value);
+            ll_insert_last(the_list, &the_value);
             d->num_insert++;
             last = 1;
         } else {
             // do a delete operation
-            if (ll_remove_search(the_list, num_equals, the_value) != -1) {
+            if (ll_remove_search(the_list, num_equals, &the_value) != -1) {
                 d->num_remove++;
                 last = -1;
             }

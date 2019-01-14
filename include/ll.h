@@ -38,7 +38,7 @@
 /* type definitions */
 
 // useful for casting
-typedef void (*gen_fun_t)(int);
+typedef void (*gen_fun_t)(void *);
 
 // linked list
 typedef struct ll ll_t;
@@ -75,41 +75,16 @@ ll_t *ll_new(gen_fun_t val_teardown);
 // traverses the linked list, deallocated everything (including `list`)
 void ll_delete(ll_t *list);
 
-// // inserts a value into the linked list at position `n`. acceptable values for n are `0`
-// // (puts it in first) to `list->len` (puts it in last).
-// // returns the new length of the linked list if successful, -1 otherwise
-// int ll_insert_n(ll_t *list, int val, int n);
-
-// // puts a value at the front of the linked list.
-// // returns the new length of the linked list if successful, -1 otherwise
-// int ll_insert_first(ll_t *list, int val);
-
 // puts a value at the end of the linked list.
 // returns the new length of the linked list if successful, -1 otherwise
-int ll_insert_last(ll_t *list, int val);
-
-// // removes the value at position n of the linked list.
-// // returns the new length of the linked list if successful, -1 otherwise
-// int ll_remove_n(ll_t *list, int n);
-
-// // removes the value at the front of the linked list.
-// // returns the new length of the linked list if successful, -1 otherwise
-// int ll_remove_first(ll_t *list);
+int ll_insert_last(ll_t *list, void *val);
 
 // given a function that tests the values in the linked list, the first element that
 // satisfies that function is removed.
 // returns the new length of the linked list if successful, -1 otherwise
-int ll_remove_search(ll_t *list, int cond(int, int), int);
+int ll_remove_search(ll_t *list, int cond(void *, void *), void *);
 
-int ll_search(ll_t *list, int cond(int, int), int);
-
-// // returns a pointer to the `n`th value in the linked list.
-// // returns `NULL` if unsuccessful
-// int ll_get_n(ll_t *list, int n);
-
-// // returns a pointer to the first value in a linked list.
-// // `NULL` if empty
-// int ll_get_first(ll_t *list);
+int ll_search(ll_t *list, int cond(void *, void *), void *);
 
 // runs f on all values of list
 void ll_map(ll_t *list, gen_fun_t f);
@@ -118,7 +93,38 @@ void ll_map(ll_t *list, gen_fun_t f);
 void ll_print(ll_t list);
 
 // a generic taredown function for values that don't need anything done
-void ll_no_teardown(int n);
+void ll_no_teardown(void *n);
+
+/***
+
+// inserts a value into the linked list at position `n`. acceptable values for n are `0`
+// (puts it in first) to `list->len` (puts it in last).
+// returns the new length of the linked list if successful, -1 otherwise
+int ll_insert_n(ll_t *list, void *val, int n);
+
+// puts a value at the front of the linked list.
+// returns the new length of the linked list if successful, -1 otherwise
+int ll_insert_first(ll_t *list, void *val);
+
+int my_ll_insert_last(ll_t *list, void *val);
+
+// removes the value at position n of the linked list.
+// returns the new length of the linked list if successful, -1 otherwise
+int ll_remove_n(ll_t *list, int n);
+
+// removes the value at the front of the linked list.
+// returns the new length of the linked list if successful, -1 otherwise
+int ll_remove_first(ll_t *list);
+
+// returns a pointer to the `n`th value in the linked list.
+// returns `NULL` if unsuccessful
+void *ll_get_n(ll_t *list, int n);
+
+// returns a pointer to the first value in a linked list.
+// `NULL` if empty
+void *ll_get_first(ll_t *list);
+
+***/
 
 // LL_H
 #endif
