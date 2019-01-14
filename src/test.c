@@ -99,8 +99,8 @@ typedef ALIGNED(64) struct thread_data {
     int id;
 } thread_data_t;
 
-int num_equals(void *n, void *m) {
-    return *(unsigned long *)n == *(unsigned long *)m;
+int num_equals(int n, int m) {
+    return n == m;
 }
 
 void *test(void *data)
@@ -132,7 +132,7 @@ void *test(void *data)
         the_value = my_random(&seeds[0], &seeds[1], &seeds[2]) & rand_max;
         // we make sure the insert was effective (as opposed to just updating an
         // existing entry)
-        if (ll_insert_last(the_list, &the_value) == -1) {
+        if (ll_insert_last(the_list, the_value) == -1) {
             i--;
         }
     }
@@ -148,15 +148,15 @@ void *test(void *data)
         op = my_random(&seeds[0], &seeds[1], &seeds[2]) & 0xff;
         if (op < read_thresh) {
             // do a find operation
-            ll_search(the_list, num_equals, &the_value);
+            ll_search(the_list, num_equals, the_value);
         } else if (last == -1) {
             // do a write operation
-            my_ll_insert_last(the_list, &the_value);
+            ll_insert_last(the_list, the_value);
             d->num_insert++;
             last = 1;
         } else {
             // do a delete operation
-            if (ll_remove_search(the_list, num_equals, &the_value) != -1) {
+            if (ll_remove_search(the_list, num_equals, the_value) != -1) {
                 d->num_remove++;
                 last = -1;
             }
@@ -369,6 +369,10 @@ int main(int argc, char *const argv[])
     printf("#txs     : %lu (%f / s)\n", operations,
            operations * 1000.0 / duration);
     printf("Expected size: %ld Actual size: %d\n", reported_total, the_list->len);
+
+    ll_delete(the_list);
+    pthread_rwlock_destroy(&(the_list->m));
+    free(the_list);
 
     free(threads);
     free(data);

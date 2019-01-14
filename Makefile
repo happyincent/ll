@@ -14,12 +14,12 @@ deps = $(OBJ:%.o=%.o.d)
 
 CC = gcc
 
-CFLAGS += -g -O1 -pthread
-# CFLAGS += -Wall -Werror -Wextra -Wunused
-# CFLAGS += -std=gnu99 -D_GNU_SOURCE -pthread
-# CFLAGS += -fno-strict-aliasing
-# CFLAGS += -D_REENTRANT
-# CFLAGS += -pedantic
+CFLAGS += -g -O1 # -pthread
+CFLAGS += -Wall -Werror -Wextra -Wunused
+CFLAGS += -std=gnu99 -D_GNU_SOURCE -pthread
+CFLAGS += -fno-strict-aliasing
+CFLAGS += -D_REENTRANT
+CFLAGS += -pedantic
 CFLAGS += -I"$(INCDIR)"
 
 all: $(EXEC)

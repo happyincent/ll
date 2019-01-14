@@ -65,39 +65,14 @@ ll_t *ll_new(gen_fun_t val_teardown);
 // traverses the linked list, deallocated everything (including `list`)
 void ll_delete(ll_t *list);
 
-// inserts a value into the linked list at position `n`. acceptable values for n are `0`
-// (puts it in first) to `list->len` (puts it in last).
-// returns the new length of the linked list if successful, -1 otherwise
-int ll_insert_n(ll_t *list, void *val, int n);
-
-// puts a value at the front of the linked list.
-// returns the new length of the linked list if successful, -1 otherwise
-int ll_insert_first(ll_t *list, void *val);
-
 // puts a value at the end of the linked list.
 // returns the new length of the linked list if successful, -1 otherwise
-int ll_insert_last(ll_t *list, void *val);
-
-// removes the value at position n of the linked list.
-// returns the new length of the linked list if successful, -1 otherwise
-int ll_remove_n(ll_t *list, int n);
-
-// removes the value at the front of the linked list.
-// returns the new length of the linked list if successful, -1 otherwise
-int ll_remove_first(ll_t *list);
+int ll_insert_last(ll_t *list, int val);
 
 // given a function that tests the values in the linked list, the first element that
 // satisfies that function is removed.
 // returns the new length of the linked list if successful, -1 otherwise
-int ll_remove_search(ll_t *list, int cond(void *));
-
-// returns a pointer to the `n`th value in the linked list.
-// returns `NULL` if unsuccessful
-void *ll_get_n(ll_t *list, int n);
-
-// returns a pointer to the first value in a linked list.
-// `NULL` if empty
-void *ll_get_first(ll_t *list);
+int ll_remove_search(ll_t *list, int cond(int, int), int);
 
 // runs f on all values of list
 void ll_map(ll_t *list, gen_fun_t f);
@@ -106,7 +81,7 @@ void ll_map(ll_t *list, gen_fun_t f);
 void ll_print(ll_t list);
 
 // a generic taredown function for values that don't need anything done
-void ll_no_teardown(void *n);
+void ll_no_teardown(int n);
 ```
 
 ## Testing
@@ -130,38 +105,49 @@ gcc:     gcc (Ubuntu 5.4.0-6ubuntu1~16.04.11) 5.4.0 20160609
 
 ### Result
 ```
-(gdb) make clean all
+itlab@ITLabHP:~/Desktop/ll$ make clean all
 building object files...
-gcc -g -O1 -Wall -Werror -Wextra -Wunused -std=gnu99 -D_GNU_SOURCE -pthread -fno-strict-aliasing -D_REENTRANT -pedantic -I"include" -o obj/ll.o -MMD -MF obj/ll.o.d -c src/ll.c
+gcc -g -O1  -Wall -Werror -Wextra -Wunused -std=gnu99 -D_GNU_SOURCE -pthread -fno-strict-aliasing -D_REENTRANT -pedantic -I"include" -o obj/ll.o -MMD -MF obj/ll.o.d -c src/ll.c
 building object files...
-gcc -g -O1 -Wall -Werror -Wextra -Wunused -std=gnu99 -D_GNU_SOURCE -pthread -fno-strict-aliasing -D_REENTRANT -pedantic -I"include" -o obj/test.o -MMD -MF obj/test.o.d -c src/test.c
+gcc -g -O1  -Wall -Werror -Wextra -Wunused -std=gnu99 -D_GNU_SOURCE -pthread -fno-strict-aliasing -D_REENTRANT -pedantic -I"include" -o obj/test.o -MMD -MF obj/test.o.d -c src/test.c
 building binary...
-gcc -g -O1 -Wall -Werror -Wextra -Wunused -std=gnu99 -D_GNU_SOURCE -pthread -fno-strict-aliasing -D_REENTRANT -pedantic -I"include" -o bin/test obj/ll.o obj/test.o
+gcc -g -O1  -Wall -Werror -Wextra -Wunused -std=gnu99 -D_GNU_SOURCE -pthread -fno-strict-aliasing -D_REENTRANT -pedantic -I"include" -o bin/test obj/ll.o obj/test.o
+itlab@ITLabHP:~/Desktop/ll$ gdb -q --args ./bin/test "-n 300"
+Reading symbols from ./bin/test...done.
 (gdb) run
-`/home/itlab/Desktop/ll/bin/test' has changed; re-reading symbols.
-Starting program: /home/itlab/Desktop/ll/bin/test -n\ 3
+Starting program: /home/itlab/Desktop/ll/bin/test -n\ 300
 [Thread debugging using libthread_db enabled]
 Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
-[New Thread 0x7ffff77ef700 (LWP 5021)]
-[New Thread 0x7fffeefee700 (LWP 5022)]
-[New Thread 0x7ffff6fee700 (LWP 5023)]
-Thread 0
-  #operations   : 101973
-  #inserts   : 10321
-  #removes   : 10320
-Thread 1
-  #operations   : 100374
-  #inserts   : 10184
-  #removes   : 10183
-Thread 2
-  #operations   : 103057
-  #inserts   : 10447
-  #removes   : 10446
+[New Thread 0x7ffff77ef700 (LWP 5077)]
+...
+[Thread 0x7ffd9cfe1700 (LWP 5435) exited]
+...
+Thread 299
+  #operations   : 26
+  #inserts   : 2
+  #removes   : 1
 Duration      : 1000 (ms)
-#txs     : 305404 (305404.000000 / s)
-Expected size: 1026 Actual size: 1026
-[Thread 0x7ffff6fee700 (LWP 5023) exited]
-[Thread 0x7fffeefee700 (LWP 5022) exited]
-[Thread 0x7ffff77ef700 (LWP 5021) exited]
-[Inferior 1 (process 5014) exited normally]
+#txs     : 5819 (5819.000000 / s)
+Expected size: 1237 Actual size: 1237
+[Inferior 1 (process 5064) exited normally]
+(gdb)
+```
+
+```
+$ G_SLICE=always-malloc valgrind --leak-check=full ./bin/test -n 300
+...
+==7922== HEAP SUMMARY:
+==7922==     in use at exit: 19,200 bytes in 300 blocks
+==7922==   total heap usage: 2,155 allocs, 1,855 frees, 237,584 bytes allocated
+==7922==
+==7922== LEAK SUMMARY:
+==7922==    definitely lost: 19,200 bytes in 300 blocks
+==7922==    indirectly lost: 0 bytes in 0 blocks
+==7922==      possibly lost: 0 bytes in 0 blocks
+==7922==    still reachable: 0 bytes in 0 blocks
+==7922==         suppressed: 0 bytes in 0 blocks
+==7922== Rerun with --leak-check=full to see details of leaked memory
+==7922==
+==7922== For counts of detected and suppressed errors, rerun with: -v
+==7922== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
 ```
