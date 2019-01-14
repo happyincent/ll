@@ -163,6 +163,7 @@ void *test(void *data)
         }
         d->num_operations++;
     }
+    free(seeds);
     return NULL;
 }
 

@@ -134,20 +134,15 @@ Expected size: 1237 Actual size: 1237
 ```
 
 ```
-$ G_SLICE=always-malloc valgrind ./bin/test -n 300
+$ valgrind --leak-check=full ./bin/test -n 300
 ...
-==26508== HEAP SUMMARY:
-==26508==     in use at exit: 19,200 bytes in 300 blocks
-==26508==   total heap usage: 4,613 allocs, 4,313 frees, 414,560 bytes allocated
-==26508==
-==26508== LEAK SUMMARY:
-==26508==    definitely lost: 19,200 bytes in 300 blocks
-==26508==    indirectly lost: 0 bytes in 0 blocks
-==26508==      possibly lost: 0 bytes in 0 blocks
-==26508==    still reachable: 0 bytes in 0 blocks
-==26508==         suppressed: 0 bytes in 0 blocks
-==26508== Rerun with --leak-check=full to see details of leaked memory
-==26508==
-==26508== For counts of detected and suppressed errors, rerun with: -v
-==26508== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+==16256==
+==16256== HEAP SUMMARY:
+==16256==     in use at exit: 0 bytes in 0 blocks
+==16256==   total heap usage: 3,099 allocs, 3,099 frees, 305,552 bytes allocated
+==16256==
+==16256== All heap blocks were freed -- no leaks are possible
+==16256==
+==16256== For counts of detected and suppressed errors, rerun with: -v
+==16256== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
 ```
